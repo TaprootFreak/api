@@ -61,8 +61,14 @@ function generateBtcHistory(range) {
   const points = [];
   for (let i = cfg.count; i >= 0; i--) {
     const ts = new Date(now - i * cfg.step).toISOString();
-    const base = 0.95 + Math.sin(i * 0.3) * 0.05;
-    points.push({ timestamp: ts, netBalance: parseFloat(base.toFixed(8)) });
+    const onchain = parseFloat((0.35 + Math.sin(i * 0.2) * 0.02).toFixed(8));
+    const lndOnchain = parseFloat((0.35 + Math.sin(i * 0.25) * 0.01).toFixed(8));
+    const lightning = parseFloat((1.28 + Math.sin(i * 0.3) * 0.03).toFixed(8));
+    const citrea = parseFloat((0.60 + Math.sin(i * 0.15) * 0.01).toFixed(8));
+    const wbtc = parseFloat((0.004 + Math.sin(i * 0.1) * 0.001).toFixed(8));
+    const wbtce = parseFloat((0.001 + Math.sin(i * 0.35) * 0.0005).toFixed(8));
+    const netBalance = parseFloat((onchain + lndOnchain + lightning + citrea + wbtc + wbtce).toFixed(8));
+    points.push({ timestamp: ts, netBalance, onchain, lndOnchain, lightning, citrea, wbtc, wbtce });
   }
   return points;
 }
@@ -74,8 +80,12 @@ function generateUsdHistory(range) {
   const points = [];
   for (let i = cfg.count; i >= 0; i--) {
     const ts = new Date(now - i * cfg.step).toISOString();
-    const base = 101000 + Math.sin(i * 0.4) * 2000;
-    points.push({ timestamp: ts, totalBalance: parseFloat(base.toFixed(2)) });
+    const jusd = parseFloat((58000 + Math.sin(i * 0.2) * 500).toFixed(2));
+    const usdc = parseFloat((840 + Math.sin(i * 0.3) * 50).toFixed(2));
+    const usdtEthereum = parseFloat((2630 + Math.sin(i * 0.25) * 100).toFixed(2));
+    const usdtPolygon = parseFloat((40091 + Math.sin(i * 0.15) * 200).toFixed(2));
+    const totalBalance = parseFloat((jusd + usdc + usdtEthereum + usdtPolygon).toFixed(2));
+    points.push({ timestamp: ts, totalBalance, jusd, usdc, usdtEthereum, usdtPolygon });
   }
   return points;
 }

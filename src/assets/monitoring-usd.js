@@ -115,29 +115,47 @@ function renderChart(points) {
   if (usdChart) usdChart.destroy();
 
   var labels = [];
-  var totalData = [];
+  var jusdData = [];
+  var usdcData = [];
+  var usdtEthData = [];
+  var usdtPolyData = [];
 
   for (var i = 0; i < points.length; i++) {
     labels.push(new Date(points[i].timestamp));
-    totalData.push(points[i].totalBalance);
+    jusdData.push(points[i].jusd);
+    usdcData.push(points[i].usdc);
+    usdtEthData.push(points[i].usdtEthereum);
+    usdtPolyData.push(points[i].usdtPolygon);
+  }
+
+  var components = [
+    { label: 'JUSD (Citrea)', data: jusdData, color: '#ff9800' },
+    { label: 'USDC (Ethereum)', data: usdcData, color: '#4fc3f7' },
+    { label: 'USDT (Ethereum)', data: usdtEthData, color: '#66bb6a' },
+    { label: 'USDT (Polygon)', data: usdtPolyData, color: '#ab47bc' },
+  ];
+
+  var datasets = [];
+  for (var i = 0; i < components.length; i++) {
+    var c = components[i];
+    datasets.push({
+      label: c.label,
+      data: c.data,
+      borderColor: c.color,
+      backgroundColor: c.color + '40',
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0,
+      fill: true,
+      stack: 'usd',
+    });
   }
 
   usdChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
-      datasets: [
-        {
-          label: 'Total USD Holdings',
-          data: totalData,
-          borderColor: '#66bb6a',
-          backgroundColor: 'rgba(102,187,106,0.1)',
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0,
-          fill: true,
-        },
-      ],
+      datasets: datasets,
     },
     options: {
       responsive: true,
@@ -148,6 +166,11 @@ function renderChart(points) {
         tooltip: {
           callbacks: {
             label: function (ctx) { return ctx.dataset.label + ': $' + fmtUsd(ctx.parsed.y); },
+            footer: function (items) {
+              var sum = 0;
+              for (var i = 0; i < items.length; i++) sum += items[i].parsed.y;
+              return 'Total: $' + fmtUsd(sum);
+            },
           },
         },
       },
@@ -159,6 +182,7 @@ function renderChart(points) {
           ticks: { color: '#555', font: { family: "'Courier New', monospace", size: 10 }, maxTicksLimit: 8 },
         },
         y: {
+          stacked: true,
           grid: { color: '#1a1a1a' },
           ticks: {
             color: '#555',

@@ -175,29 +175,53 @@ function renderChart(points) {
   if (btcChart) btcChart.destroy();
 
   var labels = [];
-  var netData = [];
+  var onchainData = [];
+  var lndOnchainData = [];
+  var lightningData = [];
+  var citreaData = [];
+  var wbtcData = [];
+  var wbtceData = [];
 
   for (var i = 0; i < points.length; i++) {
     labels.push(new Date(points[i].timestamp));
-    netData.push(points[i].netBalance);
+    onchainData.push(points[i].onchain);
+    lndOnchainData.push(points[i].lndOnchain);
+    lightningData.push(points[i].lightning);
+    citreaData.push(points[i].citrea);
+    wbtcData.push(points[i].wbtc);
+    wbtceData.push(points[i].wbtce);
+  }
+
+  var components = [
+    { label: 'Onchain BTC', data: onchainData, color: '#4fc3f7' },
+    { label: 'LND Onchain', data: lndOnchainData, color: '#00e5ff' },
+    { label: 'Lightning', data: lightningData, color: '#fdd835' },
+    { label: 'cBTC (Citrea)', data: citreaData, color: '#ff9800' },
+    { label: 'WBTC (Ethereum)', data: wbtcData, color: '#66bb6a' },
+    { label: 'WBTCe (Citrea)', data: wbtceData, color: '#ab47bc' },
+  ];
+
+  var datasets = [];
+  for (var i = 0; i < components.length; i++) {
+    var c = components[i];
+    datasets.push({
+      label: c.label,
+      data: c.data,
+      borderColor: c.color,
+      backgroundColor: c.color + '40',
+      borderWidth: 1.5,
+      pointRadius: 0,
+      tension: 0,
+      fill: true,
+      stack: 'btc',
+    });
   }
 
   btcChart = new Chart(ctx, {
     type: 'line',
     data: {
       labels: labels,
-      datasets: [
-        {
-          label: 'Net BTC Balance',
-          data: netData,
-          borderColor: '#4fc3f7',
-          backgroundColor: 'rgba(79,195,247,0.1)',
-          borderWidth: 1.5,
-          pointRadius: 0,
-          tension: 0,
-          fill: true,
-        },
-      ],
+      datasets: datasets,
     },
     options: {
       responsive: true,
@@ -208,6 +232,11 @@ function renderChart(points) {
         tooltip: {
           callbacks: {
             label: function (ctx) { return ctx.dataset.label + ': ' + fmtBtc(ctx.parsed.y) + ' BTC'; },
+            footer: function (items) {
+              var sum = 0;
+              for (var i = 0; i < items.length; i++) sum += items[i].parsed.y;
+              return 'Total: ' + fmtBtc(sum) + ' BTC';
+            },
           },
         },
       },
@@ -219,6 +248,7 @@ function renderChart(points) {
           ticks: { color: '#555', font: { family: "'Courier New', monospace", size: 10 }, maxTicksLimit: 8 },
         },
         y: {
+          stacked: true,
           grid: { color: '#1a1a1a' },
           ticks: {
             color: '#555',
