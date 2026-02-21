@@ -194,7 +194,7 @@ function renderChart(points) {
           backgroundColor: 'rgba(79,195,247,0.1)',
           borderWidth: 1.5,
           pointRadius: 0,
-          tension: 0.2,
+          tension: 0,
           fill: true,
         },
       ],
