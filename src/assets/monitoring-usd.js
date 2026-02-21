@@ -183,6 +183,7 @@ function renderChart(points) {
         },
         y: {
           stacked: true,
+          beginAtZero: true,
           grid: { color: '#1a1a1a' },
           ticks: {
             color: '#555',

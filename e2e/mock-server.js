@@ -62,13 +62,12 @@ function generateBtcHistory(range) {
   for (let i = cfg.count; i >= 0; i--) {
     const ts = new Date(now - i * cfg.step).toISOString();
     const onchain = parseFloat((0.35 + Math.sin(i * 0.2) * 0.02).toFixed(8));
-    const lndOnchain = parseFloat((0.35 + Math.sin(i * 0.25) * 0.01).toFixed(8));
-    const lightning = parseFloat((1.28 + Math.sin(i * 0.3) * 0.03).toFixed(8));
+    const lndMinusCustomer = parseFloat((0.07 + Math.sin(i * 0.25) * 0.02).toFixed(8));
     const citrea = parseFloat((0.60 + Math.sin(i * 0.15) * 0.01).toFixed(8));
     const wbtc = parseFloat((0.004 + Math.sin(i * 0.1) * 0.001).toFixed(8));
     const wbtce = parseFloat((0.001 + Math.sin(i * 0.35) * 0.0005).toFixed(8));
-    const netBalance = parseFloat((onchain + lndOnchain + lightning + citrea + wbtc + wbtce).toFixed(8));
-    points.push({ timestamp: ts, netBalance, onchain, lndOnchain, lightning, citrea, wbtc, wbtce });
+    const netBalance = parseFloat((onchain + lndMinusCustomer + citrea + wbtc + wbtce).toFixed(8));
+    points.push({ timestamp: ts, netBalance, onchain, lndMinusCustomer, citrea, wbtc, wbtce });
   }
   return points;
 }

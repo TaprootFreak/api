@@ -132,6 +132,10 @@ function render(data) {
   html += '</table>';
   html += '</div>';
 
+  html += '<div class="section">';
+  html += '<p class="note">In the chart above, "LND Minus Customer" is calculated as LND Wallet + LN Channels - Customer Balance.</p>';
+  html += '</div>';
+
   content.innerHTML = html;
 
   var onchainRow = document.getElementById('onchain-row');
@@ -176,8 +180,7 @@ function renderChart(points) {
 
   var labels = [];
   var onchainData = [];
-  var lndOnchainData = [];
-  var lightningData = [];
+  var lndMinusCustomerData = [];
   var citreaData = [];
   var wbtcData = [];
   var wbtceData = [];
@@ -185,8 +188,7 @@ function renderChart(points) {
   for (var i = 0; i < points.length; i++) {
     labels.push(new Date(points[i].timestamp));
     onchainData.push(points[i].onchain);
-    lndOnchainData.push(points[i].lndOnchain);
-    lightningData.push(points[i].lightning);
+    lndMinusCustomerData.push(points[i].lndMinusCustomer);
     citreaData.push(points[i].citrea);
     wbtcData.push(points[i].wbtc);
     wbtceData.push(points[i].wbtce);
@@ -194,8 +196,7 @@ function renderChart(points) {
 
   var components = [
     { label: 'Onchain BTC', data: onchainData, color: '#4fc3f7' },
-    { label: 'LND Onchain', data: lndOnchainData, color: '#00e5ff' },
-    { label: 'Lightning', data: lightningData, color: '#fdd835' },
+    { label: 'LND Minus Customer', data: lndMinusCustomerData, color: '#fdd835' },
     { label: 'cBTC (Citrea)', data: citreaData, color: '#ff9800' },
     { label: 'WBTC (Ethereum)', data: wbtcData, color: '#66bb6a' },
     { label: 'WBTCe (Citrea)', data: wbtceData, color: '#ab47bc' },
@@ -249,6 +250,7 @@ function renderChart(points) {
         },
         y: {
           stacked: true,
+          beginAtZero: true,
           grid: { color: '#1a1a1a' },
           ticks: {
             color: '#555',

@@ -151,7 +151,7 @@ export class MonitoringController {
   @ApiExcludeEndpoint()
   async btcHistory(
     @Query('range') range: string,
-  ): Promise<{ points: { timestamp: string; netBalance: number; onchain: number; lndOnchain: number; lightning: number; citrea: number; wbtc: number; wbtce: number }[]; range: string }> {
+  ): Promise<{ points: { timestamp: string; netBalance: number; onchain: number; lndMinusCustomer: number; citrea: number; wbtc: number; wbtce: number }[]; range: string }> {
     const { fromDate, grouping } = this.parseRange(range);
 
     const [balanceHistory, evmHistory, seedBalance, seedEvmBalances] = await Promise.all([
@@ -217,7 +217,7 @@ export class MonitoringController {
     evmHistory: { timestamp: string; blockchain: string; nativeBalance: number; tokenBalances: string }[],
     seedBalance?: { timestamp: string; onchainBalance: number; lndOnchainBalance: number; lightningBalance: number; citreaBalance: number; customerBalance: number },
     seedEvmBalances?: { timestamp: string; blockchain: string; nativeBalance: number; tokenBalances: string }[],
-  ): { timestamp: string; netBalance: number; onchain: number; lndOnchain: number; lightning: number; citrea: number; wbtc: number; wbtce: number }[] {
+  ): { timestamp: string; netBalance: number; onchain: number; lndMinusCustomer: number; citrea: number; wbtc: number; wbtce: number }[] {
     const allTimestamps = new Set<string>();
     for (const b of balanceHistory) allTimestamps.add(new Date(b.timestamp).toISOString());
     for (const e of evmHistory) allTimestamps.add(new Date(e.timestamp).toISOString());
@@ -230,7 +230,7 @@ export class MonitoringController {
     let balIdx = 0;
     let evmIdx = 0;
 
-    const points: { timestamp: string; netBalance: number; onchain: number; lndOnchain: number; lightning: number; citrea: number; wbtc: number; wbtce: number }[] = [];
+    const points: { timestamp: string; netBalance: number; onchain: number; lndMinusCustomer: number; citrea: number; wbtc: number; wbtce: number }[] = [];
 
     for (const ts of sorted) {
       while (balIdx < balanceHistory.length && new Date(balanceHistory[balIdx].timestamp).toISOString() <= ts) {
@@ -244,10 +244,8 @@ export class MonitoringController {
       }
 
       const onchain = lastBalance ? Number(lastBalance.onchainBalance) / 1e8 : 0;
-      const lndOnchain = lastBalance ? Number(lastBalance.lndOnchainBalance) / 1e8 : 0;
-      const lightning = lastBalance ? Number(lastBalance.lightningBalance) / 1e8 : 0;
+      const lndMinusCustomer = lastBalance ? (Number(lastBalance.lndOnchainBalance) + Number(lastBalance.lightningBalance) - Number(lastBalance.customerBalance)) / 1e8 : 0;
       const citrea = lastBalance ? Number(lastBalance.citreaBalance) / 1e8 : 0;
-      const customer = lastBalance ? Number(lastBalance.customerBalance) / 1e8 : 0;
 
       let wbtc = 0;
       let wbtce = 0;
@@ -266,10 +264,9 @@ export class MonitoringController {
 
       points.push({
         timestamp: ts,
-        netBalance: onchain + lndOnchain + lightning + citrea + wbtc + wbtce - customer,
+        netBalance: onchain + lndMinusCustomer + citrea + wbtc + wbtce,
         onchain,
-        lndOnchain,
-        lightning,
+        lndMinusCustomer,
         citrea,
         wbtc,
         wbtce,
