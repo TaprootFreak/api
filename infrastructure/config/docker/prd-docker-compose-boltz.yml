@@ -87,6 +87,30 @@ services:
       - VITE_API_URL=http://backend:9000
       - VITE_RSK_LOG_SCAN_ENDPOINT=[VITE_RSK_LOG_SCAN_ENDPOINT]
 
+  claim:
+    image: dfxswiss/boltz-claim:latest
+    restart: unless-stopped
+    networks:
+      - shared
+    depends_on:
+      - postgres
+    ports:
+      - '3001:3001'
+    logging:
+      driver: 'json-file'
+      options:
+        max-size: '100m'
+        max-file: '3'
+    env_file:
+      - secrets/boltz-claim.env
+    environment:
+      - PORT=3001
+      - TARGET_CHAIN=mainnet
+      - DATABASE_URL=postgresql://[POSTGRES_USERNAME]:[POSTGRES_PASSWORD]@postgres:5432/[POSTGRES_DATABASE]
+      - RPC_CITREA_MAINNET=https://rpc.juiceswap.com
+      - RPC_POLYGON=https://polygon-mainnet.g.alchemy.com/v2/[API-KEY]
+      - RPC_ETHEREUM=https://eth-mainnet.g.alchemy.com/v2/[API-KEY]
+
 networks:
   shared:
     external: true

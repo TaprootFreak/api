@@ -100,6 +100,15 @@ After Docker Compose is successfully executed for the very first time, the follo
 1. Find the User Id in the URL
 1. Set the value of the `LNBITS_ADMIN_USERS` in the config file `~/volumes/lnbits/.env` to the User Id
 
+ ## Secrets Management
+
+```bash
+cd infrastructure/config/docker/secrets
+cp boltz-claim.env.example boltz-claim.env
+chmod 600 boltz-claim.env
+# Edit and add your private key
+```
+
 # Infrastructure Update
 
 ## Backup
