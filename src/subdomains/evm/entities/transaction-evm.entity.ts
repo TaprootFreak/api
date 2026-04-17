@@ -17,13 +17,13 @@ export class TransactionEvmEntity extends IEntity {
   @ManyToOne(() => AssetTransferEntity, { eager: true })
   asset: AssetTransferEntity;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   amount: number;
 
   @Column()
   transaction: string;
 
-  @Column({ length: 'MAX', nullable: true })
+  @Column({ type: 'text', nullable: true })
   errorMessage?: string;
 
   @OneToOne(() => UserTransactionEntity, (tx) => tx.evmTransaction, { nullable: true, eager: true })

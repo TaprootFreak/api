@@ -17,7 +17,7 @@ export class LightningWalletEntity extends IEntity {
   @Column()
   lnurlpId: string;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   balance: number;
 
   @ManyToOne(() => AssetAccountEntity, { nullable: false, eager: true })

@@ -29,7 +29,7 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
         .getRawMany();
     }
 
-    const allowedFormats: Record<string, string> = { hourly: 'yyyy-MM-dd HH:00', daily: 'yyyy-MM-dd' };
+    const allowedFormats: Record<string, string> = { hourly: 'YYYY-MM-DD HH24:00', daily: 'YYYY-MM-DD' };
     const format = allowedFormats[grouping];
     if (!format) throw new Error(`Invalid grouping: ${grouping}`);
 
@@ -42,7 +42,7 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
             .leftJoin('sub.asset', 'a')
             .where('a.name = :assetName', { assetName })
             .andWhere('sub.created >= :fromDate', { fromDate })
-            .groupBy(`FORMAT(sub.created, '${format}')`),
+            .groupBy(`TO_CHAR(sub.created, '${format}')`),
         'latest',
         'b.id = latest.maxId',
       )

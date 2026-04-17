@@ -44,11 +44,11 @@ Access requires a wallet with the `DEBUG` role. The role hierarchy allows `ADMIN
        name = 'addDebugWalletTIMESTAMP'
 
        async up(queryRunner) {
-           await queryRunner.query(`UPDATE wallet SET role = 'Debug', updated = GETDATE() WHERE address = 'WALLET_ADDRESS'`);
+           await queryRunner.query(`UPDATE wallet SET role = 'Debug', updated = CURRENT_TIMESTAMP WHERE address = 'WALLET_ADDRESS'`);
        }
 
        async down(queryRunner) {
-           await queryRunner.query(`UPDATE wallet SET role = 'User', updated = GETDATE() WHERE address = 'WALLET_ADDRESS'`);
+           await queryRunner.query(`UPDATE wallet SET role = 'User', updated = CURRENT_TIMESTAMP WHERE address = 'WALLET_ADDRESS'`);
        }
    }
    ```
@@ -64,7 +64,7 @@ Access requires a wallet with the `DEBUG` role. The role hierarchy allows `ADMIN
 
 **SQL Queries:**
 ```bash
-./scripts/db-debug.sh "SELECT TOP 10 * FROM wallet"
+./scripts/db-debug.sh "SELECT * FROM wallet LIMIT 10"
 ./scripts/db-debug.sh "SELECT * FROM monitoring_balance"
 ```
 
@@ -81,5 +81,5 @@ Access requires a wallet with the `DEBUG` role. The role hierarchy allows `ADMIN
 
 - Only `SELECT` queries allowed (no INSERT, UPDATE, DELETE)
 - Sensitive columns are automatically masked (signatures, keys, secrets)
-- System schemas blocked (sys, information_schema)
+- System schemas blocked (pg_catalog, information_schema)
 - All queries are logged for audit

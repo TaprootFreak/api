@@ -26,25 +26,25 @@ export class PaymentRequestEntity extends IEntity {
   @ManyToOne(() => AssetAccountEntity, { eager: true })
   invoiceAsset: AssetAccountEntity;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   invoiceAmount: number;
 
   @ManyToOne(() => AssetTransferEntity, { eager: true, nullable: true })
   transferAsset?: AssetTransferEntity;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   transferAmount: number;
 
-  @Column({ length: 'MAX' })
+  @Column({ type: 'text' })
   paymentRequest: string;
 
-  @Column({ type: 'datetime2' })
+  @Column({ type: 'timestamp' })
   expiryDate: Date;
 
   @Column()
   paymentMethod: PaymentRequestMethod;
 
-  @Column({ length: 'MAX', nullable: true })
+  @Column({ type: 'text', nullable: true })
   errorMessage?: string;
 
   @ManyToOne(() => LightningWalletEntity, { eager: true })

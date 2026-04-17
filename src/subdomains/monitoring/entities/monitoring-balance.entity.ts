@@ -11,28 +11,28 @@ export class MonitoringBalanceEntity extends IEntity {
   @ManyToOne(() => AssetAccountEntity, { eager: true })
   asset: AssetAccountEntity;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   onchainBalance: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   lndOnchainBalance: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   lightningBalance: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   citreaBalance: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   customerBalance: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   assetPriceInCHF: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   ldsBalance: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   ldsBalanceInCHF: number;
 
   // --- FACTORY METHODS --- //

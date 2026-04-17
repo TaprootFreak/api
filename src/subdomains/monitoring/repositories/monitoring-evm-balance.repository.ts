@@ -25,7 +25,7 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
         .getRawMany();
     }
 
-    const allowedFormats: Record<string, string> = { hourly: 'yyyy-MM-dd HH:00', daily: 'yyyy-MM-dd' };
+    const allowedFormats: Record<string, string> = { hourly: 'YYYY-MM-DD HH24:00', daily: 'YYYY-MM-DD' };
     const format = allowedFormats[grouping];
     if (!format) throw new Error(`Invalid grouping: ${grouping}`);
 
@@ -36,7 +36,7 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
             .select('MAX(sub.id)', 'maxId')
             .from(MonitoringEvmBalanceEntity, 'sub')
             .where('sub.created >= :fromDate', { fromDate })
-            .groupBy(`sub.blockchain, FORMAT(sub.created, '${format}')`),
+            .groupBy(`sub.blockchain, TO_CHAR(sub.created, '${format}')`),
         'latest',
         'b.id = latest.maxId',
       )

@@ -32,9 +32,9 @@ export class Configuration {
   azureIpSubstring = '169.254';
 
   database: TypeOrmModuleOptions = {
-    type: 'mssql',
+    type: 'postgres',
     host: process.env.SQL_HOST,
-    port: Number.parseInt(process.env.SQL_PORT ?? '1433'),
+    port: Number.parseInt(process.env.SQL_PORT ?? '5432'),
     username: process.env.SQL_USERNAME,
     password: process.env.SQL_PASSWORD,
     database: process.env.SQL_DB,
@@ -43,10 +43,7 @@ export class Configuration {
     synchronize: process.env.SQL_SYNCHRONIZE === 'true',
     migrationsRun: process.env.SQL_MIGRATE === 'true',
     migrations: ['migration/*.js'],
-    connectionTimeout: 30000,
-    requestTimeout: 30000,
     logging: false,
-    options: { trustServerCertificate: this.environment === Environment.LOC },
   };
 
   auth = {

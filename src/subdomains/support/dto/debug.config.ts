@@ -7,10 +7,10 @@ import { LogQueryDto, LogQueryTemplate } from './log-query.dto';
 const DebugMaxResults = 10000;
 
 // Blocked database schemas (system tables)
-const DebugBlockedSchemas = ['sys', 'information_schema', 'master', 'msdb', 'tempdb'];
+const DebugBlockedSchemas = ['pg_catalog', 'information_schema', 'pg_toast', 'pg_temp'];
 
 // Dangerous SQL functions that could be used for data exfiltration or external connections
-const DebugDangerousFunctions = ['openrowset', 'openquery', 'opendatasource', 'openxml'];
+const DebugDangerousFunctions = ['pg_read_file', 'pg_read_binary_file', 'pg_ls_dir', 'lo_import', 'lo_export', 'dblink', 'dblink_exec', 'dblink_connect', 'pg_sleep', 'pg_execute_server_program'];
 
 // Blocked columns per table (sensitive data that should not be exposed via debug endpoint)
 const DebugBlockedCols: Record<string, string[]> = {
@@ -21,15 +21,13 @@ const DebugBlockedCols: Record<string, string[]> = {
   payment_request: ['paymentRequest'],
 };
 
-// MSSQL debug query configuration
-export const MssqlDebugConfig: SqlQueryConfig = {
-  database: SqlDialect.MSSQL,
+// PostgreSQL debug query configuration
+export const PostgresDebugConfig: SqlQueryConfig = {
+  database: SqlDialect.PostgreSQL,
   blockedSchemas: DebugBlockedSchemas,
   blockedCols: DebugBlockedCols,
   dangerousFunctions: DebugDangerousFunctions,
   maxResults: DebugMaxResults,
-  checkForXmlJson: true,
-  checkLinkedServers: true,
 };
 
 // Log query templates for Azure Application Insights

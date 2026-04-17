@@ -12,10 +12,10 @@ export class MonitoringEvmBalanceEntity extends IEntity {
   @Column({ type: 'varchar', length: 10 })
   nativeSymbol: string;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   nativeBalance: number;
 
-  @Column({ type: 'nvarchar', length: 'max', nullable: true })
+  @Column({ type: 'text', nullable: true })
   tokenBalances: string;
 
   // --- FACTORY METHOD --- //

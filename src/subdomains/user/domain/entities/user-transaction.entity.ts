@@ -16,19 +16,19 @@ export class UserTransactionEntity extends IEntity {
   @Column()
   type: UserTransactionType;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   amount: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   fee: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'double precision', nullable: true })
   balance: number;
 
-  @Column({ type: 'datetime2' })
+  @Column({ type: 'timestamp' })
   creationTimestamp: Date;
 
-  @Column({ type: 'datetime2', nullable: true })
+  @Column({ type: 'timestamp', nullable: true })
   expiresTimestamp?: Date;
 
   @Column({ nullable: true })

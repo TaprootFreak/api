@@ -8,6 +8,6 @@ module.exports = class dropAssetDescription1715773098452 {
     }
 
     async down(queryRunner) {
-        await queryRunner.query(`ALTER TABLE "asset_account" ADD "description" nvarchar(255)`);
+        await queryRunner.query(`ALTER TABLE "asset_account" ADD "description" varchar(255)`);
     }
 }

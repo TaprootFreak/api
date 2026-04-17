@@ -6,7 +6,7 @@ import { LightningLogger } from 'src/shared/services/lightning-logger';
 import { DataSource } from 'typeorm';
 import { BoltzDebugConfig } from '../dto/boltz-debug.config';
 import { DbQueryDto } from '../dto/db-query.dto';
-import { DebugLogQueryTemplates, MssqlDebugConfig } from '../dto/debug.config';
+import { DebugLogQueryTemplates, PostgresDebugConfig } from '../dto/debug.config';
 import { LogQueryDto, LogQueryResult } from '../dto/log-query.dto';
 import { SqlQueryValidator } from './sql-query-validator';
 import { SwapDto, SwapStatsQueryDto, SwapStatsResponseDto, SwapStatusFilter, SwapType } from '../dto/swap-stats.dto';
@@ -109,18 +109,18 @@ export class SupportService implements OnModuleDestroy {
 
   async executeDebugQuery(sql: string, userIdentifier: string): Promise<Record<string, unknown>[]> {
     // Validate query using shared validator
-    const { tables } = this.sqlValidator.validateQuery(sql, MssqlDebugConfig);
+    const { tables } = this.sqlValidator.validateQuery(sql, PostgresDebugConfig);
 
     // Log query for audit trail
     this.logger.verbose(`Debug query by ${userIdentifier}: ${sql.substring(0, 500)}${sql.length > 500 ? '...' : ''}`);
 
     // Execute query with result limit
     try {
-      const limitedSql = this.sqlValidator.ensureResultLimit(sql, MssqlDebugConfig);
+      const limitedSql = this.sqlValidator.ensureResultLimit(sql, PostgresDebugConfig);
       const result = await this.dataSource.query(limitedSql);
 
       // Post-execution masking (defense in depth)
-      this.sqlValidator.maskBlockedColumns(result, tables, MssqlDebugConfig);
+      this.sqlValidator.maskBlockedColumns(result, tables, PostgresDebugConfig);
 
       return result;
     } catch (e) {

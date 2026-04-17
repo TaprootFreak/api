@@ -29,10 +29,10 @@ export class UserBoltcardEntity extends IEntity {
   @Column({ type: 'int' })
   counter: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   txLimit: number;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   dailyLimit: number;
 
   @Column()
@@ -56,7 +56,7 @@ export class UserBoltcardEntity extends IEntity {
   @Column()
   otp: string;
 
-  @Column({ type: 'datetime2' })
+  @Column({ type: 'timestamp' })
   creationTimestamp: Date;
 
   @ManyToOne(() => LightningWalletEntity, { eager: true })

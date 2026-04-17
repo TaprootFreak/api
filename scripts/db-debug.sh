@@ -4,7 +4,7 @@
 #
 # Usage:
 #   ./scripts/db-debug.sh                                    # Default query (wallets)
-#   ./scripts/db-debug.sh "SELECT TOP 10 id FROM wallet"     # Custom SQL query
+#   ./scripts/db-debug.sh "SELECT id FROM wallet LIMIT 10"    # Custom SQL query
 #
 # Environment:
 #   Uses the central .env file. Required variables:
@@ -26,14 +26,14 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   echo "  ./scripts/db-debug.sh [SQL_QUERY]"
   echo ""
   echo "Examples:"
-  echo "  ./scripts/db-debug.sh \"SELECT TOP 10 * FROM wallet\""
-  echo "  ./scripts/db-debug.sh \"SELECT TOP 10 * FROM user_transaction ORDER BY id DESC\""
-  echo "  ./scripts/db-debug.sh \"SELECT TOP 10 * FROM lightning_wallet\""
+  echo "  ./scripts/db-debug.sh \"SELECT * FROM wallet LIMIT 10\""
+  echo "  ./scripts/db-debug.sh \"SELECT * FROM user_transaction ORDER BY id DESC LIMIT 10\""
+  echo "  ./scripts/db-debug.sh \"SELECT * FROM lightning_wallet LIMIT 10\""
   exit 0
 fi
 
 # --- Parse arguments ---
-SQL="${1:-SELECT TOP 5 id, address, role FROM wallet ORDER BY id DESC}"
+SQL="${1:-SELECT id, address, role FROM wallet ORDER BY id DESC LIMIT 5}"
 
 # --- Load environment ---
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"

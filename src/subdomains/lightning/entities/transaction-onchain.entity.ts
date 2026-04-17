@@ -6,18 +6,18 @@ export class TransactionOnchainEntity extends IEntity {
   @Column({ unique: true })
   transaction: string;
 
-  @Column({ type: 'float' })
+  @Column({ type: 'double precision' })
   amount: number;
 
-  @Column({ type: 'float', default: 0 })
+  @Column({ type: 'double precision', default: 0 })
   fee: number;
 
-  @Column({ type: 'float', nullable: true })
+  @Column({ type: 'double precision', nullable: true })
   balance?: number;
 
   @Column({ type: 'int' })
   block: number;
 
-  @Column({ type: 'datetime2' })
+  @Column({ type: 'timestamp' })
   timestamp: Date;
 }
