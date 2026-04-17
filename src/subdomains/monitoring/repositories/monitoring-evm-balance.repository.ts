@@ -18,8 +18,8 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
       return this.createQueryBuilder('b')
         .select('b.created', 'timestamp')
         .addSelect('b.blockchain', 'blockchain')
-        .addSelect('b.nativeBalance', '"nativeBalance"')
-        .addSelect('b.tokenBalances', '"tokenBalances"')
+        .addSelect('b.nativeBalance', 'nativeBalance')
+        .addSelect('b.tokenBalances', 'tokenBalances')
         .where('b.created >= :fromDate', { fromDate })
         .orderBy('b.created', 'ASC')
         .getRawMany();
@@ -33,7 +33,7 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
       .innerJoin(
         (qb) =>
           qb
-            .select('MAX(sub.id)', '"maxId"')
+            .select('MAX(sub.id)', 'maxId')
             .from(MonitoringEvmBalanceEntity, 'sub')
             .where('sub.created >= :fromDate', { fromDate })
             .groupBy(`sub.blockchain, TO_CHAR(sub.created, '${format}')`),
@@ -42,8 +42,8 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
       )
       .select('b.created', 'timestamp')
       .addSelect('b.blockchain', 'blockchain')
-      .addSelect('b.nativeBalance', '"nativeBalance"')
-      .addSelect('b.tokenBalances', '"tokenBalances"')
+      .addSelect('b.nativeBalance', 'nativeBalance')
+      .addSelect('b.tokenBalances', 'tokenBalances')
       .orderBy('b.created', 'ASC')
       .setParameters({ fromDate })
       .getRawMany();
@@ -56,7 +56,7 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
       .innerJoin(
         (qb) =>
           qb
-            .select('MAX(sub.id)', '"maxId"')
+            .select('MAX(sub.id)', 'maxId')
             .from(MonitoringEvmBalanceEntity, 'sub')
             .where('sub.created < :beforeDate', { beforeDate })
             .groupBy('sub.blockchain'),
@@ -65,8 +65,8 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
       )
       .select('b.created', 'timestamp')
       .addSelect('b.blockchain', 'blockchain')
-      .addSelect('b.nativeBalance', '"nativeBalance"')
-      .addSelect('b.tokenBalances', '"tokenBalances"')
+      .addSelect('b.nativeBalance', 'nativeBalance')
+      .addSelect('b.tokenBalances', 'tokenBalances')
       .setParameters({ beforeDate })
       .getRawMany();
   }
@@ -76,7 +76,7 @@ export class MonitoringEvmBalanceRepository extends BaseRepository<MonitoringEvm
       .innerJoin(
         (qb) =>
           qb
-            .select('MAX(sub.id)', '"maxId"')
+            .select('MAX(sub.id)', 'maxId')
             .from(MonitoringEvmBalanceEntity, 'sub')
             .groupBy('sub.blockchain'),
         'latest',

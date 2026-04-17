@@ -91,7 +91,7 @@ export class UserBoltcardService {
     } else {
       const lightningWalletIterator = this.lightningWalletRepository.getRawIterator<{ adminKey: string }>(
         100,
-        'adminKey',
+        '"adminKey"',
       );
       let lightningWalletInfo = await lightningWalletIterator.next();
 

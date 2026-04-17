@@ -22,7 +22,7 @@ export class LightningWalletRepository extends BaseRepository<LightningWalletEnt
 
     return this.createQueryBuilder()
       .select('"assetId"')
-      .addSelect('SUM(balance)', '"totalBalance"')
+      .addSelect('SUM(balance)', 'totalBalance')
       .where('"lnbitsWalletId" IN (:...internalLnbitsWalletIds)', { internalLnbitsWalletIds })
       .groupBy('"assetId"')
       .getRawMany<LightningWalletTotalBalanceDto>();
@@ -31,7 +31,7 @@ export class LightningWalletRepository extends BaseRepository<LightningWalletEnt
   async getCustomerBalances(excludeLnbitsWalletIds: string[]): Promise<LightningWalletTotalBalanceDto[]> {
     const query = this.createQueryBuilder()
       .select('"assetId"')
-      .addSelect('SUM(balance)', '"totalBalance"')
+      .addSelect('SUM(balance)', 'totalBalance')
       .groupBy('"assetId"');
 
     if (excludeLnbitsWalletIds.length) {
