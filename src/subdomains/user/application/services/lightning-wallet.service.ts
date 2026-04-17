@@ -121,7 +121,7 @@ export class LightningWalletService {
     } else {
       const lightningWalletIterator = this.lightningWalletRepository.getRawIterator<LightningWalletInfoDto>(
         100,
-        'id AS lightningWalletId, lnbitsWalletId, adminKey, assetId AS accountAssetId',
+        'id AS "lightningWalletId", "lnbitsWalletId", "adminKey", "assetId" AS "accountAssetId"',
       );
       let lightningWalletInfo = await lightningWalletIterator.next();
 

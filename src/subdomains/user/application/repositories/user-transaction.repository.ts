@@ -11,7 +11,7 @@ export class UserTransactionRepository extends BaseRepository<UserTransactionEnt
 
   async getMaxCreationTimestamp(lnbitsWalletId: string): Promise<{ maxCreationTimestamp: Date } | undefined> {
     return this.createQueryBuilder('ut')
-      .select('max(ut.creationTimestamp) as maxCreationTimestamp')
+      .select('max(ut.creationTimestamp) as "maxCreationTimestamp"')
       .leftJoin('ut.lightningWallet', 'lw')
       .where('lw.lnbitsWalletId = :lnbitsWalletId', { lnbitsWalletId })
       .groupBy('lw.lnbitsWalletId')
@@ -24,9 +24,9 @@ export class UserTransactionRepository extends BaseRepository<UserTransactionEnt
 
   async getBalances(): Promise<{ lightningWalletId: number; balance: number }[]> {
     return this.createQueryBuilder()
-      .select('lightningWalletId')
+      .select('"lightningWalletId"')
       .addSelect('sum(amount - abs(fee)) as balance')
-      .groupBy('lightningWalletId')
+      .groupBy('"lightningWalletId"')
       .getRawMany<{ lightningWalletId: number; balance: number }>();
   }
 }

@@ -18,11 +18,11 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
       return this.createQueryBuilder('b')
         .leftJoin('b.asset', 'asset')
         .select('b.created', 'timestamp')
-        .addSelect('b.onchainBalance', 'onchainBalance')
-        .addSelect('b.lndOnchainBalance', 'lndOnchainBalance')
-        .addSelect('b.lightningBalance', 'lightningBalance')
-        .addSelect('b.citreaBalance', 'citreaBalance')
-        .addSelect('b.customerBalance', 'customerBalance')
+        .addSelect('b.onchainBalance', '"onchainBalance"')
+        .addSelect('b.lndOnchainBalance', '"lndOnchainBalance"')
+        .addSelect('b.lightningBalance', '"lightningBalance"')
+        .addSelect('b.citreaBalance', '"citreaBalance"')
+        .addSelect('b.customerBalance', '"customerBalance"')
         .where('asset.name = :assetName', { assetName })
         .andWhere('b.created >= :fromDate', { fromDate })
         .orderBy('b.created', 'ASC')
@@ -37,21 +37,21 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
       .innerJoin(
         (qb) =>
           qb
-            .select('MAX(sub.id)', 'maxId')
+            .select('MAX(sub.id)', '"maxId"')
             .from(MonitoringBalanceEntity, 'sub')
             .leftJoin('sub.asset', 'a')
             .where('a.name = :assetName', { assetName })
             .andWhere('sub.created >= :fromDate', { fromDate })
             .groupBy(`TO_CHAR(sub.created, '${format}')`),
         'latest',
-        'b.id = latest.maxId',
+        'b.id = latest."maxId"',
       )
       .select('b.created', 'timestamp')
-      .addSelect('b.onchainBalance', 'onchainBalance')
-      .addSelect('b.lndOnchainBalance', 'lndOnchainBalance')
-      .addSelect('b.lightningBalance', 'lightningBalance')
-      .addSelect('b.citreaBalance', 'citreaBalance')
-      .addSelect('b.customerBalance', 'customerBalance')
+      .addSelect('b.onchainBalance', '"onchainBalance"')
+      .addSelect('b.lndOnchainBalance', '"lndOnchainBalance"')
+      .addSelect('b.lightningBalance', '"lightningBalance"')
+      .addSelect('b.citreaBalance', '"citreaBalance"')
+      .addSelect('b.customerBalance', '"customerBalance"')
       .orderBy('b.created', 'ASC')
       .setParameters({ assetName, fromDate })
       .getRawMany();
@@ -64,11 +64,11 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
     const results = await this.createQueryBuilder('b')
       .leftJoin('b.asset', 'asset')
       .select('b.created', 'timestamp')
-      .addSelect('b.onchainBalance', 'onchainBalance')
-      .addSelect('b.lndOnchainBalance', 'lndOnchainBalance')
-      .addSelect('b.lightningBalance', 'lightningBalance')
-      .addSelect('b.citreaBalance', 'citreaBalance')
-      .addSelect('b.customerBalance', 'customerBalance')
+      .addSelect('b.onchainBalance', '"onchainBalance"')
+      .addSelect('b.lndOnchainBalance', '"lndOnchainBalance"')
+      .addSelect('b.lightningBalance', '"lightningBalance"')
+      .addSelect('b.citreaBalance', '"citreaBalance"')
+      .addSelect('b.customerBalance', '"customerBalance"')
       .where('asset.name = :assetName', { assetName })
       .andWhere('b.created < :beforeDate', { beforeDate })
       .orderBy('b.created', 'DESC')
@@ -83,11 +83,11 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
       .innerJoin(
         (qb) =>
           qb
-            .select('MAX(sub.id)', 'maxId')
+            .select('MAX(sub.id)', '"maxId"')
             .from(MonitoringBalanceEntity, 'sub')
-            .groupBy('sub.assetId'),
+            .groupBy('sub."assetId"'),
         'latest',
-        'b.id = latest.maxId',
+        'b.id = latest."maxId"',
       )
       .leftJoinAndSelect('b.asset', 'asset')
       .getMany();
@@ -104,8 +104,8 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
 
   private async maxEntity(assetId: number): Promise<MonitoringBalanceEntity | null> {
     const maxId = await this.createQueryBuilder()
-      .select('max(id) as maxId')
-      .where('assetId = :assetId', { assetId })
+      .select('max(id) as "maxId"')
+      .where('"assetId" = :assetId', { assetId })
       .getRawOne<{ maxId: number }>();
     if (!maxId) return null;
 
