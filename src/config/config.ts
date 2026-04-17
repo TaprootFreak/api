@@ -38,6 +38,9 @@ export class Configuration {
     username: process.env.SQL_USERNAME,
     password: process.env.SQL_PASSWORD,
     database: process.env.SQL_DB,
+    ssl: {
+      rejectUnauthorized: false,
+    },
     entities: ['dist/**/*.entity{.ts,.js}'],
     autoLoadEntities: true,
     synchronize: process.env.SQL_SYNCHRONIZE === 'true',
