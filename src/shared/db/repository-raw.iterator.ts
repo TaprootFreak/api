@@ -14,9 +14,9 @@ export class RepositoryRawIterator<T extends ObjectLiteral> {
 
   async next(): Promise<T[]> {
     const entities = await this.repository
-      .createQueryBuilder()
+      .createQueryBuilder('e')
       .select(this.selection)
-      .orderBy({ id: 'ASC' })
+      .orderBy('e.id', 'ASC')
       .skip(this.offset)
       .take(this.numberOfEntries)
       .getRawMany<T>();

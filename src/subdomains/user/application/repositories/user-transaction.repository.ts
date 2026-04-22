@@ -23,10 +23,10 @@ export class UserTransactionRepository extends BaseRepository<UserTransactionEnt
   }
 
   async getBalances(): Promise<{ lightningWalletId: number; balance: number }[]> {
-    return this.createQueryBuilder()
-      .select('"lightningWalletId"')
-      .addSelect('sum(amount - abs(fee)) as balance')
-      .groupBy('"lightningWalletId"')
+    return this.createQueryBuilder('ut')
+      .select('ut.lightningWallet.id', 'lightningWalletId')
+      .addSelect('SUM(ut.amount - ABS(ut.fee))', 'balance')
+      .groupBy('ut.lightningWallet.id')
       .getRawMany<{ lightningWalletId: number; balance: number }>();
   }
 }

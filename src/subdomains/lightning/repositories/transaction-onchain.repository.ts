@@ -10,8 +10,8 @@ export class TransactionOnchainRepository extends BaseRepository<TransactionOnch
   }
 
   async getMaxBlock(): Promise<number | undefined> {
-    return this.createQueryBuilder()
-      .select('MAX(block)', 'block')
+    return this.createQueryBuilder('t')
+      .select('MAX(t.block)', 'block')
       .getRawOne<{ block: number }>()
       .then((r) => r?.block);
   }

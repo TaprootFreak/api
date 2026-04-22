@@ -1,10 +1,10 @@
 import { forwardRef, Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { Config } from 'src/config/config';
 import {
+  isLnBitsTransactionExtraTag,
   LnBitsTransactionDto,
   LnBitsTransactionExtraDto,
   LnBitsTransactionWebhookTransferDto,
-  isLnBitsTransactionExtraTag,
 } from 'src/integration/blockchain/lightning/dto/lnbits.dto';
 import { LightningClient } from 'src/integration/blockchain/lightning/lightning-client';
 import { LightningHelper } from 'src/integration/blockchain/lightning/lightning-helper';
@@ -121,7 +121,7 @@ export class LightningWalletService {
     } else {
       const lightningWalletIterator = this.lightningWalletRepository.getRawIterator<LightningWalletInfoDto>(
         100,
-        'id AS "lightningWalletId", "lnbitsWalletId", "adminKey", "assetId" AS "accountAssetId"',
+        '"id" AS "lightningWalletId", "lnbitsWalletId", "adminKey", "assetId" AS "accountAssetId"',
       );
       let lightningWalletInfo = await lightningWalletIterator.next();
 

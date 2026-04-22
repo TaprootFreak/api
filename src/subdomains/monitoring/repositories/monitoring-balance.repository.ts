@@ -13,7 +13,16 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
     assetName: string,
     fromDate: Date,
     grouping: 'raw' | 'hourly' | 'daily',
-  ): Promise<{ timestamp: string; onchainBalance: number; lndOnchainBalance: number; lightningBalance: number; citreaBalance: number; customerBalance: number }[]> {
+  ): Promise<
+    {
+      timestamp: string;
+      onchainBalance: number;
+      lndOnchainBalance: number;
+      lightningBalance: number;
+      citreaBalance: number;
+      customerBalance: number;
+    }[]
+  > {
     if (grouping === 'raw') {
       return this.createQueryBuilder('b')
         .leftJoin('b.asset', 'asset')
@@ -60,7 +69,17 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
   async getLastBalanceBefore(
     assetName: string,
     beforeDate: Date,
-  ): Promise<{ timestamp: string; onchainBalance: number; lndOnchainBalance: number; lightningBalance: number; citreaBalance: number; customerBalance: number } | undefined> {
+  ): Promise<
+    | {
+        timestamp: string;
+        onchainBalance: number;
+        lndOnchainBalance: number;
+        lightningBalance: number;
+        citreaBalance: number;
+        customerBalance: number;
+      }
+    | undefined
+  > {
     const results = await this.createQueryBuilder('b')
       .leftJoin('b.asset', 'asset')
       .select('b.created', 'timestamp')
@@ -81,11 +100,7 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
   async getLatestBalances(): Promise<MonitoringBalanceEntity[]> {
     return this.createQueryBuilder('b')
       .innerJoin(
-        (qb) =>
-          qb
-            .select('MAX(sub.id)', 'maxId')
-            .from(MonitoringBalanceEntity, 'sub')
-            .groupBy('sub."assetId"'),
+        (qb) => qb.select('MAX(sub.id)', 'maxId').from(MonitoringBalanceEntity, 'sub').groupBy('sub."assetId"'),
         'latest',
         'b.id = latest."maxId"',
       )
@@ -103,9 +118,9 @@ export class MonitoringBalanceRepository extends BaseRepository<MonitoringBalanc
   }
 
   private async maxEntity(assetId: number): Promise<MonitoringBalanceEntity | null> {
-    const maxId = await this.createQueryBuilder()
-      .select('max(id)', 'maxId')
-      .where('"assetId" = :assetId', { assetId })
+    const maxId = await this.createQueryBuilder('b')
+      .select('max(b.id)', 'maxId')
+      .where('b.asset.id = :assetId', { assetId })
       .getRawOne<{ maxId: number }>();
     if (!maxId) return null;
 

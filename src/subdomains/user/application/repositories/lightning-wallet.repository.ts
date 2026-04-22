@@ -20,22 +20,22 @@ export class LightningWalletRepository extends BaseRepository<LightningWalletEnt
   async getInternalBalances(internalLnbitsWalletIds: string[]): Promise<LightningWalletTotalBalanceDto[]> {
     if (!internalLnbitsWalletIds.length) return [];
 
-    return this.createQueryBuilder()
-      .select('"assetId"')
-      .addSelect('SUM(balance)', 'totalBalance')
-      .where('"lnbitsWalletId" IN (:...internalLnbitsWalletIds)', { internalLnbitsWalletIds })
-      .groupBy('"assetId"')
+    return this.createQueryBuilder('lw')
+      .select('lw.asset.id', 'assetId')
+      .addSelect('SUM(lw.balance)', 'totalBalance')
+      .where('lw.lnbitsWalletId IN (:...internalLnbitsWalletIds)', { internalLnbitsWalletIds })
+      .groupBy('lw.asset.id')
       .getRawMany<LightningWalletTotalBalanceDto>();
   }
 
   async getCustomerBalances(excludeLnbitsWalletIds: string[]): Promise<LightningWalletTotalBalanceDto[]> {
-    const query = this.createQueryBuilder()
-      .select('"assetId"')
-      .addSelect('SUM(balance)', 'totalBalance')
-      .groupBy('"assetId"');
+    const query = this.createQueryBuilder('lw')
+      .select('lw.asset.id', 'assetId')
+      .addSelect('SUM(lw.balance)', 'totalBalance')
+      .groupBy('lw.asset.id');
 
     if (excludeLnbitsWalletIds.length) {
-      query.where('"lnbitsWalletId" NOT IN (:...excludeLnbitsWalletIds)', { excludeLnbitsWalletIds });
+      query.where('lw.lnbitsWalletId NOT IN (:...excludeLnbitsWalletIds)', { excludeLnbitsWalletIds });
     }
 
     return query.getRawMany<LightningWalletTotalBalanceDto>();
