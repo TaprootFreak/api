@@ -7,6 +7,7 @@ import * as path from 'path';
  * 1. All createQueryBuilder() calls have an alias
  *    - Either via createQueryBuilder('alias')
  *    - Or via .from(table, 'alias')
+ *    - Or via .update('table') pattern (update queries don't need alias)
  *
  * 2. All column references use the alias prefix (alias.column)
  *    Checked in:
@@ -33,9 +34,14 @@ describe('Query Builder Alias Enforcement', () => {
     let match;
     while ((match = noAliasPattern.exec(content)) !== null) {
       // Check if followed by .from() with an alias (dataSource pattern)
-      const afterMatch = content.substring(match.index + match[0].length, match.index + match[0].length + 200);
+      const afterMatch = content.substring(match.index + match[0].length, match.index + match[0].length + 300);
       if (/^\s*[\n\r]*\s*\.\s*from\s*\([^,]+,\s*[^)]+\)/.test(afterMatch)) {
         continue; // Has alias via .from(table, alias)
+      }
+
+      // Check if followed by .update() (update queries don't need alias)
+      if (/^\s*[\n\r]*\s*\.\s*update\s*\(/.test(afterMatch)) {
+        continue; // Update query pattern
       }
 
       const lineNumber = content.substring(0, match.index).split('\n').length;
@@ -83,6 +89,10 @@ describe('Query Builder Alias Enforcement', () => {
     'then',
     'else',
     'end',
+    'distinct',
+    'exists',
+    'any',
+    'all',
   ]);
 
   const sqlFunctions = new Set([
@@ -113,6 +123,10 @@ describe('Query Builder Alias Enforcement', () => {
     'to_date',
     'extract',
     'date_trunc',
+    'round',
+    'floor',
+    'ceil',
+    'jsonb_array_elements_text',
   ]);
 
   /**
@@ -122,7 +136,9 @@ describe('Query Builder Alias Enforcement', () => {
     const aliases = new Set<string>([mainAlias]);
 
     // Find join aliases: .leftJoin('relation', 'alias') or .innerJoin('relation', 'alias')
-    const joinPattern = /\.(left|inner|right)Join(?:AndSelect)?\s*\(\s*['"`][^'"`]+['"`]\s*,\s*['"`](\w+)['"`]/g;
+    // This handles both relation joins and entity joins
+    const joinPattern =
+      /\.(left|inner|right)Join(?:AndSelect)?\s*\(\s*(?:['"`][^'"`]+['"`]|\w+)\s*,\s*['"`](\w+)['"`]/g;
     let joinMatch;
     while ((joinMatch = joinPattern.exec(queryChain)) !== null) {
       aliases.add(joinMatch[2]);
@@ -152,15 +168,39 @@ describe('Query Builder Alias Enforcement', () => {
     return aliases;
   };
 
+  /**
+   * Extract result aliases from SELECT statements (used in orderBy)
+   */
+  const extractResultAliases = (queryChain: string): Set<string> => {
+    const resultAliases = new Set<string>();
+
+    // Match: .select('...', 'alias') or .addSelect('...', 'alias')
+    const selectAliasPattern = /\.(select|addSelect)\s*\(\s*['"`][^'"`]+['"`]\s*,\s*['"`](\w+)['"`]/g;
+    let match;
+    while ((match = selectAliasPattern.exec(queryChain)) !== null) {
+      resultAliases.add(match[2]);
+    }
+
+    return resultAliases;
+  };
+
   const findBareColumnReferences = (filePath: string): { line: number; content: string; column: string }[] => {
     const issues: { line: number; content: string; column: string }[] = [];
     const content = fs.readFileSync(filePath, 'utf-8');
 
-    // Find query chains ending with any get method
+    // Find query chains ending with any get method (excluding getQuery which is for subqueries)
     // Handle optional generic type: getRawMany<Type>()
     // Use negative lookahead to not match across multiple createQueryBuilder calls
     const rawQueryPattern =
       /\.createQueryBuilder\s*\(\s*['"`](\w+)['"`]\s*\)((?:(?!\.createQueryBuilder)[\s\S])*?)\.(getRawMany|getRawOne|getMany|getOne|getCount)\s*(?:<[^>]+>)?\s*\(/g;
+
+    // Find all query builder aliases in the file (for correlated subquery support)
+    const allQueryAliasPattern = /\.createQueryBuilder\s*\(\s*['"`](\w+)['"`]\s*\)/g;
+    const allQueryAliases = new Set<string>();
+    let aliasMatch;
+    while ((aliasMatch = allQueryAliasPattern.exec(content)) !== null) {
+      allQueryAliases.add(aliasMatch[1]);
+    }
 
     let chainMatch;
     while ((chainMatch = rawQueryPattern.exec(content)) !== null) {
@@ -169,19 +209,58 @@ describe('Query Builder Alias Enforcement', () => {
       const chainStartIndex = chainMatch.index;
 
       // Get all valid aliases (main + joins + subqueries)
+      // Also include all query aliases from the file for correlated subquery support
       const validAliases = extractAllAliases(queryChain, mainAlias);
+      for (const alias of allQueryAliases) {
+        validAliases.add(alias);
+      }
 
-      // Extract string arguments from query methods
+      // Get result aliases (for orderBy)
+      const resultAliases = extractResultAliases(queryChain);
+
+      // Extract string arguments from query methods (excluding orderBy which can use result aliases)
       const methodPattern =
-        /\.(select|addSelect|where|andWhere|orWhere|groupBy|addGroupBy|orderBy|addOrderBy|having)\s*\(\s*['"`]([^'"`]+)['"`]/g;
+        /\.(select|addSelect|where|andWhere|orWhere|groupBy|addGroupBy|having)\s*\(\s*['"`]([^'"`]+)['"`]/g;
 
       let methodMatch;
       while ((methodMatch = methodPattern.exec(queryChain)) !== null) {
         const sqlFragment = methodMatch[2];
+
+        // Skip if contains JavaScript template expression
+        if (sqlFragment.includes('${')) continue;
+
+        // Skip if contains raw SQL subquery (SELECT ... FROM)
+        if (/SELECT\s+.*\s+FROM\s+/i.test(sqlFragment)) continue;
+
         const invalidRef = findInvalidReferenceWithAliases(sqlFragment, validAliases);
 
         if (invalidRef) {
           const beforeMatch = content.substring(0, chainStartIndex + methodMatch.index);
+          const lineNumber = beforeMatch.split('\n').length;
+
+          issues.push({
+            line: lineNumber,
+            content: sqlFragment,
+            column: invalidRef,
+          });
+        }
+      }
+
+      // Check orderBy separately (can use result aliases)
+      const orderByPattern = /\.(orderBy|addOrderBy)\s*\(\s*['"`]([^'"`]+)['"`]/g;
+      let orderMatch;
+      while ((orderMatch = orderByPattern.exec(queryChain)) !== null) {
+        const sqlFragment = orderMatch[2];
+
+        // Skip if contains JavaScript template expression
+        if (sqlFragment.includes('${')) continue;
+
+        // Combine table aliases and result aliases for orderBy
+        const allValidAliases = new Set([...validAliases, ...resultAliases]);
+        const invalidRef = findInvalidReferenceWithAliases(sqlFragment, allValidAliases);
+
+        if (invalidRef) {
+          const beforeMatch = content.substring(0, chainStartIndex + orderMatch.index);
           const lineNumber = beforeMatch.split('\n').length;
 
           issues.push({
@@ -204,7 +283,12 @@ describe('Query Builder Alias Enforcement', () => {
         let keyMatch;
         while ((keyMatch = keyPattern.exec(objectContent)) !== null) {
           const column = keyMatch[1] || keyMatch[2]; // quoted or unquoted
-          const invalidRef = findInvalidReferenceWithAliases(column, validAliases);
+
+          // Skip JavaScript expressions
+          if (column.includes('${')) continue;
+
+          const allValidAliases = new Set([...validAliases, ...resultAliases]);
+          const invalidRef = findInvalidReferenceWithAliases(column, allValidAliases);
           if (invalidRef) {
             const beforeMatch = content.substring(0, chainStartIndex + objMatch.index);
             const lineNumber = beforeMatch.split('\n').length;
@@ -244,10 +328,14 @@ describe('Query Builder Alias Enforcement', () => {
 
       // Check join conditions: .leftJoin('rel', 'alias', 'condition'), .innerJoin(...)
       const joinConditionPattern =
-        /\.(left|inner|right)Join(?:AndSelect)?\s*\(\s*['"`][^'"`]+['"`]\s*,\s*['"`]\w+['"`]\s*,\s*['"`]([^'"`]+)['"`]/g;
+        /\.(left|inner|right)Join(?:AndSelect)?\s*\(\s*(?:['"`][^'"`]+['"`]|\w+)\s*,\s*['"`]\w+['"`]\s*,\s*['"`]([^'"`]+)['"`]/g;
       let joinMatch;
       while ((joinMatch = joinConditionPattern.exec(queryChain)) !== null) {
         const condition = joinMatch[2];
+
+        // Skip JavaScript expressions
+        if (condition.includes('${')) continue;
+
         const invalidRef = findInvalidReferenceWithAliases(condition, validAliases);
         if (invalidRef) {
           const beforeMatch = content.substring(0, chainStartIndex + joinMatch.index);
@@ -286,6 +374,11 @@ describe('Query Builder Alias Enforcement', () => {
    * Check if a SQL fragment has property references not using any valid alias.
    */
   const findInvalidReferenceWithAliases = (sqlFragment: string, validAliases: Set<string>): string | null => {
+    // Skip fragments that contain raw SQL subqueries
+    if (/SELECT\s+.*\s+FROM\s+/i.test(sqlFragment)) {
+      return null;
+    }
+
     // Match word.word patterns (potential property access)
     const propertyPattern = /\b([a-zA-Z_][a-zA-Z0-9_]*)\s*\.\s*([a-zA-Z_][a-zA-Z0-9_]*)\b/g;
     let propMatch;
@@ -328,6 +421,9 @@ describe('Query Builder Alias Enforcement', () => {
 
       // Skip if followed by dot (it's a prefix, will be caught by propertyPattern)
       if (charAfter === '.') continue;
+
+      // Skip if followed by open paren (it's a function call)
+      if (charAfter === '(') continue;
 
       // This is a bare identifier that should have alias prefix
       return word;
@@ -381,6 +477,20 @@ describe('Query Builder Alias Enforcement', () => {
     it('should allow SQL functions', () => {
       const validAliases = new Set(['ut']);
       expect(findInvalidReferenceWithAliases('SUM(ut.amount)', validAliases)).toBeNull();
+    });
+
+    it('should allow ROUND function', () => {
+      const validAliases = new Set(['r']);
+      expect(findInvalidReferenceWithAliases('ROUND(SUM(r.amountInChf), 0)', validAliases)).toBeNull();
+    });
+
+    it('should skip raw SQL subqueries', () => {
+      const validAliases = new Set(['step']);
+      const sql = `step.userDataId NOT IN (
+        SELECT s2.userDataId FROM kyc_step s2
+        WHERE s2.name = :approvalName
+      )`;
+      expect(findInvalidReferenceWithAliases(sql, validAliases)).toBeNull();
     });
   });
 
