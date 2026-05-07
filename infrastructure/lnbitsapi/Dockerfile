@@ -1,6 +1,10 @@
 # Stage 0
 FROM node:18.19.1-alpine3.19 AS builder
 
+# node-gyp needs Python + a C/C++ toolchain to build sqlite3's native binding.
+# Alpine ships none of those by default.
+RUN apk add --no-cache python3 make g++
+
 USER node
 WORKDIR /home/node
 
