@@ -1,14 +1,14 @@
-name: LDS LNBITSAPI PRD CI/CD
+name: LDS API PRD CI/CD
 
 on:
   push:
     branches: [main]
-    paths:
+    paths-ignore:
       - 'infrastructure/lnbitsapi/**'
   workflow_dispatch:
 
 env:
-  DOCKER_TAGS: lightningdotspacecom/lnbitsapi:latest
+  DOCKER_TAGS: lightningdotspacecom/lds-api:latest
 
 permissions:
   contents: read
@@ -33,7 +33,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./infrastructure/lnbitsapi
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ env.DOCKER_TAGS }}
           platforms: linux/arm64
@@ -52,4 +53,4 @@ jobs:
           ssh -i ~/.ssh/deploy_key \
             -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.DEPLOY_PRD_HOST }}" \
             ${{ secrets.DEPLOY_PRD_USER }}@${{ secrets.DEPLOY_PRD_HOST }} \
-            "lds-lnbitsapi"
+            "lds-api"

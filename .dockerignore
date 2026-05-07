@@ -1,0 +1,12 @@
+node_modules
+dist
+.git
+.github
+infrastructure/lnbitsapi/node_modules
+infrastructure/lnbitsapi/dist
+*.log
+.env
+.env.*
+test
+coverage
+README.md

@@ -1,4 +1,4 @@
-name: LNBITSAPI DEV CI/CD
+name: LDS LNBITSAPI DEV CI/CD
 
 on:
   push:
@@ -8,40 +8,18 @@ on:
   workflow_dispatch:
 
 env:
-  DOCKER_TAGS: dfxswiss/lnbitsapi:latest
-  NODE_VERSION: '16.x'
+  DOCKER_TAGS: lightningdotspacecom/lnbitsapi:beta
+
+permissions:
+  contents: read
 
 jobs:
   build-and-deploy:
-    name: Build, test and deploy to DEV
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./infrastructure/lnbitsapi
+    name: Build and deploy to DEV
+    runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Use Node.js ${{ env.NODE_VERSION }}
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Install packages
-        run: |
-          npm ci
-
-      - name: Build code
-        run: |
-          npm run build
-
-      - name: Run tests
-        run: |
-          npm run test
-
-      - name: Run linter
-        run: |
-          npm run lint
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -58,3 +36,20 @@ jobs:
           context: ./infrastructure/lnbitsapi
           push: true
           tags: ${{ env.DOCKER_TAGS }}
+          platforms: linux/arm64
+
+      - name: Install cloudflared
+        run: |
+          curl -fsSL https://github.com/cloudflare/cloudflared/releases/download/2025.4.0/cloudflared-linux-arm64 -o /usr/local/bin/cloudflared
+          chmod +x /usr/local/bin/cloudflared
+
+      - name: Deploy
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_DEV_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "${{ secrets.DEPLOY_DEV_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key \
+            -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.DEPLOY_DEV_HOST }}" \
+            ${{ secrets.DEPLOY_DEV_USER }}@${{ secrets.DEPLOY_DEV_HOST }} \
+            "lds-lnbitsapi"

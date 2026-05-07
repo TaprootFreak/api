@@ -1,21 +1,21 @@
-name: LDS LNBITSAPI PRD CI/CD
+name: LDS API DEV CI/CD
 
 on:
   push:
-    branches: [main]
-    paths:
+    branches: [develop]
+    paths-ignore:
       - 'infrastructure/lnbitsapi/**'
   workflow_dispatch:
 
 env:
-  DOCKER_TAGS: lightningdotspacecom/lnbitsapi:latest
+  DOCKER_TAGS: lightningdotspacecom/lds-api:beta
 
 permissions:
   contents: read
 
 jobs:
   build-and-deploy:
-    name: Build and deploy to PRD
+    name: Build and deploy to DEV
     runs-on: ubuntu-24.04-arm
     steps:
       - name: Checkout
@@ -33,7 +33,8 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v6
         with:
-          context: ./infrastructure/lnbitsapi
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ env.DOCKER_TAGS }}
           platforms: linux/arm64
@@ -46,10 +47,10 @@ jobs:
       - name: Deploy
         run: |
           mkdir -p ~/.ssh
-          echo "${{ secrets.DEPLOY_PRD_SSH_KEY }}" > ~/.ssh/deploy_key
+          echo "${{ secrets.DEPLOY_DEV_SSH_KEY }}" > ~/.ssh/deploy_key
           chmod 600 ~/.ssh/deploy_key
-          echo "${{ secrets.DEPLOY_PRD_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          echo "${{ secrets.DEPLOY_DEV_SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           ssh -i ~/.ssh/deploy_key \
-            -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.DEPLOY_PRD_HOST }}" \
-            ${{ secrets.DEPLOY_PRD_USER }}@${{ secrets.DEPLOY_PRD_HOST }} \
-            "lds-lnbitsapi"
+            -o ProxyCommand="cloudflared access ssh --hostname ${{ secrets.DEPLOY_DEV_HOST }}" \
+            ${{ secrets.DEPLOY_DEV_USER }}@${{ secrets.DEPLOY_DEV_HOST }} \
+            "lds-api"
