@@ -1,7 +1,7 @@
 import { HttpException } from '@nestjs/common';
 import { IncomingHttpHeaders } from 'http';
 import { Agent } from 'https';
-import { Config } from 'src/config/config';
+import { Config, Environment } from 'src/config/config';
 import { HttpRequestConfig, HttpService } from 'src/shared/services/http.service';
 import { LightningLogger } from 'src/shared/services/lightning-logger';
 import { Util } from 'src/shared/utils/util';
@@ -596,7 +596,15 @@ export class LightningClient {
       httpsAgent: new Agent({
         ca: Config.blockchain.lightning.certificate,
       }),
+      headers: this.lnBitsForwardHeaders(),
       params: { 'api-key': adminKey, ...params },
+    };
+  }
+
+  private lnBitsForwardHeaders(): Record<string, string> {
+    return {
+      Host: Config.baseUrl,
+      'X-Forwarded-Proto': Config.environment === Environment.LOC ? 'http' : 'https',
     };
   }
 
