@@ -20,6 +20,10 @@ RUN npm ci
 
 ADD --chown=node:node . .
 RUN npm run build
+# Drop dev deps in-place after the build so the runtime stage can copy
+# the already-compiled native modules instead of re-running node-gyp
+# (which would need python3 + g++ in the runtime image again).
+RUN npm prune --omit=dev
 
 
 FROM node:18.19.1-alpine3.19
@@ -28,10 +32,9 @@ USER node
 WORKDIR /home/node
 
 COPY --from=builder /home/node/package.json /home/node/package-lock.json ./
+COPY --from=builder /home/node/node_modules ./node_modules
 COPY --from=builder /home/node/dist ./dist
 COPY --from=builder /home/node/migration ./migration
-
-RUN npm ci --omit=dev
 
 EXPOSE 3000
 

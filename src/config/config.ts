@@ -38,9 +38,12 @@ export class Configuration {
     username: process.env.SQL_USERNAME,
     password: process.env.SQL_PASSWORD,
     database: process.env.SQL_DB,
-    ssl: {
-      rejectUnauthorized: false,
-    },
+    // Azure PostgreSQL Flexible Server enforces require_secure_transport=on
+    // and is the long-running default for this codebase, so SSL stays
+    // on by default. Set SQL_SSL=false on a host where the postgres peer
+    // does not speak TLS (e.g. the local api-postgres container in the
+    // DFX dfxdev/dfxprd LDS stack).
+    ssl: process.env.SQL_SSL === 'false' ? false : { rejectUnauthorized: false },
     entities: ['dist/**/*.entity{.ts,.js}'],
     autoLoadEntities: true,
     synchronize: process.env.SQL_SYNCHRONIZE === 'true',
