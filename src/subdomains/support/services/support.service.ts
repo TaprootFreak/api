@@ -333,7 +333,7 @@ export class SupportService implements OnModuleDestroy {
     // Fetch chain swaps with their data (including preimageHash and preimage for claim TX lookup)
     const chainSwapsResult = await pool.query(`
       SELECT cs.id, cs.pair, cs."orderSide", cs.status, cs."failureReason", cs.fee,
-             cs.referral, cs."createdAt", cs."updatedAt", cs."preimageHash", cs.preimage, cs.version,
+             cs.referral, cs."createdAt", cs."updatedAt", cs."preimageHash", cs.preimage,
              sd_base.symbol as base_symbol, sd_base."lockupAddress" as base_lockup,
              sd_base."claimAddress" as base_claim, sd_base."expectedAmount" as base_expected,
              sd_base.amount as base_amount, sd_base."transactionId" as base_tx,
@@ -442,7 +442,6 @@ export class SupportService implements OnModuleDestroy {
       // Crypto details
       preimageHash: preimageHash || undefined,
       preimage: (row.preimage as string) || undefined,
-      version: row.version as number | undefined,
       // Source chain
       sourceSymbol,
       sourceChainId,

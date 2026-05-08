@@ -76,9 +76,6 @@ export class SwapDto {
   @ApiPropertyOptional({ description: 'Preimage (revealed after claim)' })
   preimage?: string;
 
-  @ApiPropertyOptional({ description: 'Swap version' })
-  version?: number;
-
   // Source chain details
   @ApiProperty()
   sourceSymbol: string;
