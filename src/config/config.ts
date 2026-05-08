@@ -129,36 +129,36 @@ export class Configuration {
     ethereum: {
       gatewayUrl: process.env.ETHEREUM_GATEWAY_URL ?? '',
       apiKey: process.env.ALCHEMY_API_KEY ?? '',
-      chainId: +(process.env.ETHEREUM_CHAIN_ID ?? -1),
+      chainId: 1,
       walletAddress: process.env.EVM_PAYMENT_ADDRESS ?? '',
     },
     arbitrum: {
       gatewayUrl: process.env.ARBITRUM_GATEWAY_URL ?? '',
       apiKey: process.env.ALCHEMY_API_KEY ?? '',
-      chainId: +(process.env.ARBITRUM_CHAIN_ID ?? -1),
+      chainId: 42161,
       walletAddress: process.env.EVM_PAYMENT_ADDRESS ?? '',
     },
     optimism: {
       gatewayUrl: process.env.OPTIMISM_GATEWAY_URL ?? '',
       apiKey: process.env.ALCHEMY_API_KEY ?? '',
-      chainId: +(process.env.OPTIMISM_CHAIN_ID ?? -1),
+      chainId: 10,
       walletAddress: process.env.EVM_PAYMENT_ADDRESS ?? '',
     },
     polygon: {
       gatewayUrl: process.env.POLYGON_GATEWAY_URL ?? '',
       apiKey: process.env.ALCHEMY_API_KEY ?? '',
-      chainId: +(process.env.POLYGON_CHAIN_ID ?? -1),
+      chainId: 137,
       walletAddress: process.env.EVM_PAYMENT_ADDRESS ?? '',
     },
     base: {
       gatewayUrl: process.env.BASE_GATEWAY_URL ?? '',
       apiKey: process.env.ALCHEMY_API_KEY ?? '',
-      chainId: +(process.env.BASE_CHAIN_ID ?? -1),
+      chainId: 8453,
       walletAddress: process.env.EVM_PAYMENT_ADDRESS ?? '',
     },
     citrea: {
       gatewayUrl: process.env.CITREA_GATEWAY_URL ?? '',
-      chainId: +(process.env.CITREA_CHAIN_ID ?? -1),
+      chainId: 5115,
     },
   };
 
