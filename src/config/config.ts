@@ -122,6 +122,9 @@ export class Configuration {
         apiUrl: process.env.LIGHTNING_LNBITSAPI_API_URL ?? '',
         certificate: process.env.LIGHTNING_LNBITSAPI_CERTIFICATE?.split('<br>').join('\n') ?? '',
       },
+      thunderhub: {
+        apiUrl: process.env.LIGHTNING_THUNDERHUB_URL ?? '',
+      },
     },
     ethereum: {
       gatewayUrl: process.env.ETHEREUM_GATEWAY_URL ?? '',
