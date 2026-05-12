@@ -9,14 +9,18 @@ export class CoinGeckoService implements OnModuleInit {
   private readonly logger = new LightningLogger(CoinGeckoService);
 
   private readonly client: CoinGeckoClient;
-  private currencies: string[];
+  private currencies: string[] = [];
 
   constructor() {
     this.client = new CoinGeckoClient({ autoRetry: false }, GetConfig().coinGecko.apiKey);
   }
 
-  onModuleInit() {
-    void this.client.simpleSupportedCurrencies().then((cs) => (this.currencies = cs));
+  async onModuleInit(): Promise<void> {
+    try {
+      this.currencies = await this.client.simpleSupportedCurrencies();
+    } catch (e) {
+      this.logger.error('Failed to load CoinGecko currencies on startup', e);
+    }
   }
 
   async getPrice(from: string, to: string): Promise<Price> {
