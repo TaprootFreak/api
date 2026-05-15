@@ -178,6 +178,11 @@ export class Configuration {
   };
 
   coinGecko = {
+    // Origin the CoinGeckoService talks to. Defaults to the in-cluster
+    // pricing-proxy so the upstream key + 60 s cache + quota monitor live
+    // in one place; set to `https://pro-api.coingecko.com` (or
+    // `https://api.coingecko.com`) to bypass the proxy in local dev.
+    baseUrl: process.env.COINGECKO_BASE_URL,
     apiKey: process.env.COIN_GECKO_API_KEY,
   };
 
